@@ -1,0 +1,7 @@
+renderDistance:12
+simulationDistance:8
+chatLinks:true
+chatLinksPrompt:true
+autoSuggestions:true
+resourcePacks:["vanilla","file/FreshAnimations_v1.10.5.zip","file/FA+Details-v2.3.zip","file/FA+Objects-v2.1.2.zip","file/FA+Emissive-v1.6.zip","file/FA+Spiders-v2.2.zip","file/FA+Creepers-v2.1.zip","file/FA+Quivers-v2.2.zip","file/FA+Player-v1.1.zip"]
+incompatibleResourcePacks:[]

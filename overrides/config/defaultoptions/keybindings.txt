@@ -1,0 +1,9 @@
+key_gui.xaero_open_map:key.keyboard.j
+key_key.push_to_talk:key.keyboard.v
+key_zoomify.key.zoom:key.keyboard.c
+key_key.saveToolbarActivator:key.keyboard.unknown
+key_key.loadToolbarActivator:key.keyboard.unknown
+key_key.jade.profile.0:key.keyboard.unknown
+key_key.jade.profile.1:key.keyboard.unknown
+key_key.jade.profile.2:key.keyboard.unknown
+key_key.jade.profile.3:key.keyboard.unknown
