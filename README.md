@@ -17,7 +17,7 @@ server address: `vanilla.cinderworks.dev`
 
 ## install
 
-1. get the newest `.mrpack` from [releases](https://github.com/cinderworks-mc/the-hearth-pack/releases) or the [pack page](https://cinderworks.dev/hearth/pack/)
+1. get the newest `.mrpack` from [modrinth](https://modrinth.com/modpack/the-hearth-pack), [releases](https://github.com/cinderworks-mc/the-hearth-pack/releases) or the [pack page](https://cinderworks.dev/hearth/pack/)
 2. in the [modrinth app](https://modrinth.com/app): add instance, then from file, then pick the `.mrpack`
 3. join `vanilla.cinderworks.dev` (it is already in your server list)
 
