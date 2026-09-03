@@ -7,7 +7,7 @@ not the shaderpacks and not the resource packs. those zips are referenced by
 their official cdn.modrinth.com url exactly like the mods are, so the launcher
 fetches each one from the author's own upload. that is a reference, not a
 redistribution, which is what keeps the restrictive licences (complementary's
-custom licence, sildur's ARR, whimscape's ARR) happy.
+custom licence, whimscape's ARR) happy.
 
 overrides/ carries only OUR OWN files. most of it sits under
 config/defaultoptions/ - the payload for the default-options mod, which applies
@@ -45,7 +45,7 @@ import argparse, calendar, json, os, sys, tempfile, time, urllib.error, urllib.r
 MC = "26.2"
 FABRIC_LOADER = "0.19.3"
 PACK_NAME = "The Hearth"
-PACK_VERSION = "2.0.1"
+PACK_VERSION = "2.1.0"
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, f"hearth-client-{MC}-{PACK_VERSION}.mrpack")
 CACHE_FILE = os.path.join(HERE, "resolve-cache.json")
@@ -64,6 +64,8 @@ ALLOW_BETA = {
     "fresh-animations",          # 1.10.5 is the only 26.2 build; FA has shipped beta-tagged for years
     "particle-rain",             # v4-beta.11+26.2-fabric is the only 26.2 build
     "visuality",                 # 0.7.14+26.2 is the only 26.2 build
+    # added 2.1.0
+    "distanthorizons",           # 26.2 line is beta only (3.2.0-b), same as the foundry
 }
 
 # each entry: (slug, pinned version_number or None, exact filename or None)
@@ -71,7 +73,7 @@ ALLOW_BETA = {
 # (sildur's ships every quality tier under the same version number).
 
 MODS_CORE = [
-    ("fabric-api",               "0.158.0+26.2",          None),
+    ("fabric-api",               "0.159.0+26.2",          None),
     ("cloth-config",             "26.2.155+fabric",       None),
     ("placeholder-api",          None,                    None),
     ("yacl",                     "3.9.6+26.2-fabric",     None),
@@ -111,6 +113,11 @@ MODS_PERF = [
     # borderless fullscreen. this is the `borderless-mining` replacement - and
     # it declares every other borderless mod INCOMPATIBLE, so never add one.
     ("cubes-without-borders",    "4.1.0+26.2",            None),
+    # distant horizons, shipped OFF (config/defaultoptions/extra/config/
+    # DistantHorizons.toml sets quickEnableRendering=false, same as the foundry).
+    # present but dormant; players enable it in options -> distant horizons. 26.2
+    # only has beta builds (ALLOW_BETA), same as the foundry ships.
+    ("distanthorizons",          "3.2.0-b-26.2",          None),
 ]
 
 MODS_VISUAL = [
@@ -118,17 +125,18 @@ MODS_VISUAL = [
     ("continuity",               "3.0.1+26.2",            None),
     ("3dskinlayers",             "1.11.2",                None),
     ("capes",                    "1.5.11+26.2",           None),
-    ("lambdynamiclights",        "4.12.3+26.2",           None),
+    ("lambdynamiclights",        "4.12.4+26.2",           None),  # 4.12.3->4.12.4: options.txt keybind fix
     ("not-enough-animations",    "1.12.4",                None),
     ("chat-heads",               "1.2.8",                 None),
     # optifine-format resource pack support (fresh animations etc). emf needs etf.
-    ("entitytexturefeatures",    "7.1.1-fabric-26.2",     None),
+    ("entitytexturefeatures",    "7.2.1-fabric-26.2",     None),  # 7.1.1->7.2.1: crash fix
     ("entity-model-features",    "3.2.6-fabric-26.2",     None),
     ("optigui",                  "2.3.0-beta.10+26.2",    None),
-    # add-on for the complementary reimagined shader below. it patches a COPY
-    # of the shader in shaderpacks/, base stays intact. lockstep rule: bump
-    # complementary -> bump this to the matching r-version.
-    ("euphoria-patches",         "1.9.3-r5.8.1-fabric",   None),
+    # add-on for the complementary shaders below (both reimagined and unbound,
+    # as of 2.1.0). it patches a COPY of the shader in shaderpacks/, base stays
+    # intact. lockstep rule: bump complementary -> bump this to the matching
+    # r-version.
+    ("euphoria-patches",         "1.10.0-r5.9-fabric",    None),
     ("fallingleaves",            "2.0.7+26.1",            None),  # lists 26.2, ambient leaf particles
     ("wavey-capes",              "1.10.2",                None),  # the motion half of `capes`
     ("particle-rain",            "v4-beta.11+26.2-fabric", None),  # biome weather, ALLOW_BETA
@@ -220,18 +228,23 @@ MODS_MAP = [
 
 # shaderpacks. loader tag is "iris", not "fabric". referenced by url only -
 # see the module docstring for why nothing here is bundled.
+#
+# sildur's vibrant shaders REMOVED in 2.1.0, matching the foundry: dropped
+# 08-26-2026, and its Extreme-VL file is gone from modrinth anyway.
+# complementary-unbound ADDED in 2.1.0 alongside reimagined, same lockstep
+# r-version rule as euphoria-patches below.
 SHADERS = [
-    ("makeup-ultra-fast-shaders", "9.5c",   "MakeUp-UltraFast-9.5c.zip"),
-    ("complementary-reimagined",  "r5.8.1", "ComplementaryReimagined_r5.8.1.zip"),
-    ("sildurs-vibrant-shaders",   "2.01",   "Sildur's Vibrant Shaders v2.01 Extreme-VL.zip"),
+    ("makeup-ultra-fast-shaders", "9.5d",   "MakeUp-UltraFast-9.5d.zip"),
+    ("complementary-reimagined",  "r5.9", "ComplementaryReimagined_r5.9.zip"),
+    ("complementary-unbound",     "r5.9", "ComplementaryUnbound_r5.9.zip"),
 ]
 
 # resource packs. loader tag is "minecraft" (modrinth's tag for a plain
 # resourcepack project), dest is resourcepacks/. referenced by url only, same as
 # the shaders - fresh animations is restrictively licensed and whimscape is ARR.
 #
-# FRESH ANIMATIONS + ITS SEVEN OFFICIAL ADDONS SHIP ENABLED, WHIMSCAPE SHIPS OFF.
-# the enabled set is the `resourcePacks:` line in
+# FRESH ANIMATIONS + ITS SEVEN OFFICIAL ADDONS SHIP ENABLED, WHIMSCAPE AND
+# DEFAULT DARK MODE SHIP OFF. the enabled set is the `resourcePacks:` line in
 # overrides/config/defaultoptions/options.txt, which default-options only
 # applies when the player has no options.txt yet, so this is a first-run default
 # and never a re-imposed one.
@@ -245,6 +258,17 @@ SHADERS = [
 # NOT shipped: `fresh-animations-extensions` (FA+All_Extensions). it is a bundle
 # of the six standalone addons below plus classic-horses, so shipping it too
 # would stack two copies of the same content at different versions.
+#
+# 2.1.0 resourcepack pass, checked live against modrinth:
+#   - default-dark-mode ADDED. has a real 26.2 build (2026.6.0-26.2). shipped
+#     present, not in the default-enabled resourcePacks line - same
+#     off-by-default posture as whimscape.
+#   - whimscape-x-fresh-animations SKIPPED, still no 26.2 build (known risk
+#     from README.md/OVERRIDES.md): newest release is still 26.1_r1
+#     (04-15-2026), pack.mcmeta caps at max_format 84 while whimscape's own
+#     26.2 build runs 84-88. re-check when kavast cuts a 26.2 build.
+#   - whimscape-exploration SKIPPED, no 26.2 build either: newest release 2.1
+#     (08-2025) tops out at 1.21.1, no build published since.
 RESOURCEPACKS = [
     ("fresh-animations",          "1.10.5",       "FreshAnimations_v1.10.5.zip"),  # ALLOW_BETA
     # the addons. all release, all list 26.2, no beta exceptions needed.
@@ -257,10 +281,12 @@ RESOURCEPACKS = [
     ("fa-player-extension",       "1.1.0",        "FA+Player-v1.1.zip"),
     # shipped present, NOT in the resourcePacks line. the player turns it on.
     ("whimscape",                 "26.1-26.2_r1", "Whimscape_26.1-26.2_r1.zip"),
+    # GUI-only dark mode. added 2.1.0, same off-by-default posture as whimscape.
+    ("default-dark-mode",         "2026.6.0-26.2", "Default-Dark-Mode-26.2-2026.6.0.zip"),
 ]
 
 MODS = MODS_CORE + MODS_PERF + MODS_VISUAL + MODS_AUDIO + MODS_QOL + MODS_BUILD + MODS_MAP
-UA = {"User-Agent": "hearth-pack-builder/1.1 (cinderworks.dev)"}
+UA = {"User-Agent": "hearth-pack-builder/1.1 (patrick.hart@pobox.com)"}
 
 
 def api(path):
@@ -593,11 +619,11 @@ def main(argv=None):
         "summary": ("optional client-side mods, shaderpacks and resource packs for "
                     "the hearth (mc 26.2, fabric). performance, visuals, qol. java "
                     "only. shaderpacks: MakeUp - Ultra Fast by Lorenzo Dal Vit, "
-                    "Complementary Shaders - Reimagined by EminGT, "
-                    "Sildur's Vibrant Shaders by Sildur. resource packs: "
-                    "Fresh Animations and its official addons by FreshLX (on by "
-                    "default), Whimscape by kavast (shipped off) - each downloaded "
-                    "from the author's own modrinth upload, none redistributed here."),
+                    "Complementary Shaders - Reimagined and Unbound by EminGT. "
+                    "resource packs: Fresh Animations and its official addons by "
+                    "FreshLX (on by default), Whimscape by kavast and Default Dark "
+                    "Mode by nebulr (both shipped off) - each downloaded from "
+                    "the author's own modrinth upload, none redistributed here."),
         "files": files,
         "dependencies": {"minecraft": MC, "fabric-loader": FABRIC_LOADER},
     }

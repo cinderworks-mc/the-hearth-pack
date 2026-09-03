@@ -1,0 +1,11 @@
+# shipped by the pack: distant horizons starts OFF. players turn it on in options -> distant horizons
+# (the dh button sits in the vanilla options screen) -> "enable rendering". everything else is dh default;
+# the mod fills the rest of this file in on first launch and keeps the values here.
+[client]
+	quickEnableRendering = false
+	showDhOptionsButtonInMinecraftUi = true
+[common]
+	[common.logging]
+		[common.logging.warning]
+			# the "g1 detected, use zgc" chat nag. the pack page tells people the zgc flags instead.
+			showGarbageCollectorWarning = false
