@@ -30,3 +30,9 @@ gh release create "$v" "$mrpack" \
   --repo cinderworks-mc/the-hearth-pack \
   --title "$v" \
   --notes "changes in CHANGELOG.md. import the .mrpack with the modrinth app."
+
+# NOTE (09-03-2026): these repos are forgejo-mirrored on github, so github's git
+# is read-only and `gh release create <tag>` cannot create the tag - it lands the
+# release as a DRAFT. correct order: push the tag to forgejo FIRST, let it mirror,
+# THEN gh release create; or publish the draft after with:
+#   gh release edit <v> -R cinderworks-mc/the-hearth-pack --draft=false
