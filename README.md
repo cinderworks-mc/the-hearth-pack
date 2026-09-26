@@ -50,6 +50,33 @@ python3 build_mrpack.py --selftest              # offline cache round-trip check
 the build ends with `resolved N from cache, M live` so you can see the cache
 working.
 
+## shipping a release
+
+`tools/publish.sh <version>` (run from this repo, `HEARTH_SRC` pointed at the
+client-pack source) copies the built mrpack's source in, commits, tags and
+pushes. as of 09-16-2026 this repo is github-primary (`origin` is
+`github.com/cinderworks-mc/the-hearth-pack` directly, no forgejo mirror in
+between) - `git push origin main <tag>` lands the tag on github immediately,
+so `gh release create <tag> <mrpack> -R cinderworks-mc/the-hearth-pack` right
+after works cleanly, no draft dance. verify with `gh release view <tag> -R
+cinderworks-mc/the-hearth-pack --json isDraft,assets`: `isDraft` must be
+`false` and the mrpack must be attached.
+
+## what 2.2.0 adds over 2.1.1
+
+- armored elytras are a real mod now instead of a datapack. forge one by putting a chestplate and an elytra in an anvil, split it back apart in a grindstone - same two actions, proper item handling underneath instead of datapack functions running every tick.
+- the pack ships the client half of it, so an armored elytra actually looks like one: the chestplate renders on your back over the elytra, and the item gets its own icon per armour type.
+- if you fused an elytra under the old datapack it keeps the armour it already had, but the grindstone won't split it back into a chestplate and an elytra once the datapack is gone. we checked every inventory, ender chest and worn slot on the server: exactly one exists and it's patrick's, so nobody else has anything to do. his rides through as-is and gets hand-fixed; if one ever turns up out of a chest in the wild, bring it to patrick.
+- the server now trims its own mob cap, then simulation distance, then view distance when tick time starts climbing, and puts all three back when it settles. it's capped at the numbers the server already ran, so it can only dip below them and return - never go past them. you might see mobs thin out slightly at the busiest moments; that's it working.
+- distant horizons has shipped in the pack but switched off since 2.1.0. the server now generates and serves the LODs, so turning it on (options, distant horizons, enable rendering) actually gets you terrain out past your render distance instead of empty space.
+- named banners now show up as markers on the bluemap. place a banner, give it a name, and it appears on the web map.
+- discord rich presence added (craftpresence). your discord shows "Cinder Works - The Hearth" while you're on. essential's own presence is switched off in the shipped config so the two don't fight over the discord pipe. the flame icon is still pending a cinder works discord app.
+- jei 30.29.0.201, fabric api 0.160.0, fabric language kotlin 1.14.1 and audioplayer 2.5.0 all move on the server and the client at the same time. jei is finally on a release build instead of a beta.
+- client bumps: sodium 0.9.2 and iris 1.11.4 together, complementary reimagined and unbound both on r5.9.2 with euphoria patches matching, make up ultra fast 9.5e, entity model features 3.3.8, xaero's minimap 26.5.0 and world map 1.46.0, litematica 0.28.8, modmenu 20.0.2, durability tooltip 1.2.0, wavey capes 1.11.1, whimscape r1 for 26.3.
+- veinminer's client half added, matching the server. veinmine only fires while you hold the key, so the keybind is also your off switch - rebind or clear it in controls.
+- twelve more server-side bumps you won't see directly: bluemap 5.24, fuji, tab, spark, polymer, puzzles lib, balm, skin restorer, almanac and let me despawn as a pair, and dungeons and taverns 5.3.2 (the last 26.2 build that line gets).
+- re-import the pack.
+
 ## what 2.1.0 adds over 2.0.1
 
 aligns the shader and resource pack lineup with the foundry's (dropped

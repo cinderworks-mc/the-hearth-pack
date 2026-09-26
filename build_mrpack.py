@@ -45,7 +45,7 @@ import argparse, calendar, json, os, sys, tempfile, time, urllib.error, urllib.r
 MC = "26.2"
 FABRIC_LOADER = "0.19.3"
 PACK_NAME = "The Hearth"
-PACK_VERSION = "2.1.0"
+PACK_VERSION = "2.2.0"
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, f"hearth-client-{MC}-{PACK_VERSION}.mrpack")
 CACHE_FILE = os.path.join(HERE, "resolve-cache.json")
@@ -58,7 +58,8 @@ HEAD_RECHECK_DAYS = 7            # a cache hit trusts its cached content-length 
 # assertion (26.2 listed, modrinth-hosted, hashes, live HEAD).
 ALLOW_BETA = {
     "sound-physics-remastered",  # 1.5.1+26.2 is the only 26.2 build, beta-tagged since june
-    "jei",                       # jei's entire 26.2 line (140+ builds) is beta-tagged, no release exists
+    # jei came OUT of this list in 2.2.0 - 30.29.0.201 (09-02-2026) is the first
+    # release-tagged 26.2 jei, so it clears the release-only rule on its own now.
     "optigui",                   # 2.3.0-beta.10+26.2 is the only 26.2 build
     # added in 2.0.0
     "fresh-animations",          # 1.10.5 is the only 26.2 build; FA has shipped beta-tagged for years
@@ -73,11 +74,11 @@ ALLOW_BETA = {
 # (sildur's ships every quality tier under the same version number).
 
 MODS_CORE = [
-    ("fabric-api",               "0.159.0+26.2",          None),
+    ("fabric-api",               "0.160.0+26.2",          None),  # server half bumps to the same
     ("cloth-config",             "26.2.155+fabric",       None),
     ("placeholder-api",          None,                    None),
     ("yacl",                     "3.9.6+26.2-fabric",     None),
-    ("fabric-language-kotlin",   "1.13.13+kotlin.2.4.10", None),
+    ("fabric-language-kotlin",   "1.14.1+kotlin.2.4.20",  None),  # kotlin 2.4.10 -> 2.4.20, both halves
     ("searchables",              "1.0.1",                 None),
     ("tcdcommons",               "5.5.6+fn-26.2",         None),
     ("prism-lib",                "1.1.2",                 None),
@@ -90,10 +91,15 @@ MODS_CORE = [
     ("default-options",          None,                    None),
     ("creativecore",             "2.14.16",               None),  # ambientsounds
     ("supermartijn642s-config-lib", "1.1.8-fabric-mc26.2", None),  # durability-tooltip
+    # craftpresence's required library (its fabric.mod.json: `unilib >=1.2.0`). the
+    # craftpresence entry went in without it, which is a REFUSE-TO-LAUNCH missing
+    # dependency, not a soft one - caught by the dependency-closure check before 2.2.0
+    # shipped. 1.2.1+26.2-fabric is the only 26.2 fabric build.
+    ("unilib",                   "1.2.1+26.2-fabric",     None),  # craftpresence
 ]
 
 MODS_PERF = [
-    ("sodium",                   "mc26.2-0.9.1-fabric",   None),  # RELEASE, not the 0.9.2 alphas
+    ("sodium",                   "mc26.2-0.9.2-fabric",   None),  # 0.9.2 cut a RELEASE 09-11, off the alpha line for good
     ("lithium",                  "mc26.2-0.25.3-fabric",  None),
     ("sodium-extra",             "mc26.2-0.9.3+fabric",   None),
     ("reeses-sodium-options",    "mc26.2-2.2.3+fabric",   None),
@@ -121,7 +127,7 @@ MODS_PERF = [
 ]
 
 MODS_VISUAL = [
-    ("iris",                     "1.11.2+26.2-fabric",    None),
+    ("iris",                     "1.11.4+26.2-fabric",    None),  # lockstep with sodium 0.9.2
     ("continuity",               "3.0.1+26.2",            None),
     ("3dskinlayers",             "1.11.2",                None),
     ("capes",                    "1.5.11+26.2",           None),
@@ -130,15 +136,19 @@ MODS_VISUAL = [
     ("chat-heads",               "1.2.8",                 None),
     # optifine-format resource pack support (fresh animations etc). emf needs etf.
     ("entitytexturefeatures",    "7.2.1-fabric-26.2",     None),  # 7.1.1->7.2.1: crash fix
-    ("entity-model-features",    "3.2.6-fabric-26.2",     None),
+    # 2.1.1 took 3.2.6->3.3.5 because etf 7.2.1 requires emf >=3.3 (launch crash otherwise).
+    # 2.2.0 goes to 3.3.8: it still declares `entity_texture_features >=7.2` / breaks <7.2,
+    # so etf 7.2.1 satisfies it and etf's own `breaks emf <3.3` stays satisfied too. upstream
+    # ships emf/etf as a same-day pair, so if etf ever moves, re-check this constraint.
+    ("entity-model-features",    "3.3.8-fabric-26.2",     None),
     ("optigui",                  "2.3.0-beta.10+26.2",    None),
     # add-on for the complementary shaders below (both reimagined and unbound,
     # as of 2.1.0). it patches a COPY of the shader in shaderpacks/, base stays
     # intact. lockstep rule: bump complementary -> bump this to the matching
     # r-version.
-    ("euphoria-patches",         "1.10.0-r5.9-fabric",    None),
+    ("euphoria-patches",         "1.10.4-r5.9.2-fabric",  None),  # lockstep with complementary r5.9.2
     ("fallingleaves",            "2.0.7+26.1",            None),  # lists 26.2, ambient leaf particles
-    ("wavey-capes",              "1.10.2",                None),  # the motion half of `capes`
+    ("wavey-capes",              "1.11.1",                None),  # the motion half of `capes`
     ("particle-rain",            "v4-beta.11+26.2-fabric", None),  # biome weather, ALLOW_BETA
     ("visuality",                "0.7.14+26.2",           None),  # ambient mob particles, ALLOW_BETA
     # config gui + glue for the optifine-alternative stack above (etf, emf,
@@ -158,13 +168,13 @@ MODS_AUDIO = [
 ]
 
 MODS_QOL = [
-    ("modmenu",                  "20.0.1",                None),
+    ("modmenu",                  "20.0.2",                None),
     ("jade",                     "26.2.11+fabric",        None),
     ("appleskin",                "3.0.10+mc26.2",         None),
     # 1.10.0: rei -> jei. rei looked broken on 26.2 (recipes are
     # server-authoritative since 1.21.2); jei ships a server jar for that,
     # which lives in the server's hearth-mods.nix. architectury-api left with rei.
-    ("jei",                      "30.25.0.177",           None),  # matched to the server's jei
+    ("jei",                      "30.29.0.201",           None),  # matched to the server's jei
     ("controlling",              "26.2.2",                None),
     ("betterf3",                 "19.0.0",                None),
     ("legendary-tooltips",       "1.6.2.1",               None),  # 1.6.2 crashed with jei 30.24.0.173 (its jei mixin), fixed upstream 08-18
@@ -188,16 +198,40 @@ MODS_QOL = [
     # (controls essential's ads/purchase-prompts/telemetry). modrinth flags are
     # 'unknown' both sides, description confirms client-only.
     ("essential-patcher",        "1.0.8",                 None),
+    # discord rich presence: "Cinder Works - The Hearth". config in
+    # overrides/config/craftpresence.json; overrides/essential/config.toml
+    # disables Essential's own presence so the two don't fight the Discord pipe.
+    # custom flame icon pending a Cinder Works Discord app (swap clientId + key).
+    ("craftpresence",            "2.7.1+26.2-fabric",     None),
     # added in 2.0.0
     ("notenoughcrashes",         "4.4.9+26.2-fabric",     None),  # crash drops to the menu, not the desktop
     ("status-effect-bars",       "1.0.12",                None),  # duration bars on potion effects
     ("item-highlighter",         "1.2.2",                 None),  # new hotbar items flash. needs iceberg
-    ("durability-tooltip",       "1.1.6-fabric-mc26.2",   None),  # needs supermartijn642s-config-lib
-    ("armor-hud",                "3.4-26.2",              None),
+    ("durability-tooltip",       "1.2.0-fabric-mc26.2",   None),  # needs supermartijn642s-config-lib
+    ("armor-hud",                "3.5.0+26.2-fabric",     None),
     # kept alongside notenoughcrashes on purpose, they do different jobs: nec
     # keeps the session alive after a client crash, crash-assistant explains the
     # corpse afterwards and points at somewhere to report it.
     ("crash-assistant",          "1.11.12",               None),
+    # ---- added in 2.2.0. all three are the CLIENT half of a mod the server runs,
+    # pinned to the exact build in cwmac/servers/hearth-mods.nix. if the server moves,
+    # these move with it.
+    #
+    # armored elytra. the server swapped the vanilla tweaks datapack for this mod in
+    # 2.2.0; modrinth flags it client:optional, but "optional" here means the game still
+    # WORKS without it, not that it looks right - the client install is what draws the
+    # chestplate on the player model and gives the fused item its own icon. without it an
+    # armored elytra renders as a plain elytra. 1.15.0 matches the server exactly (1.15.1
+    # exists, 09-19; move both halves together, not one).
+    ("elytra-armor",             "1.15.0",                None),
+    # veinminer. BOTH halves are required on the client: veinminer-client's
+    # fabric.mod.json hard-depends on `veinminer >=2.8.0`, so shipping the client half
+    # alone makes fabric loader REFUSE TO LAUNCH. the base jar is environment:"*" and
+    # modrinth lists it client:optional, so it is legitimate in a client pack. veinmine
+    # only fires while the hotkey is held, which makes the keybind the per-player off
+    # switch.
+    ("veinminer",                "2.12.1",                None),
+    ("veinminer-client",         "2.12.1",                None),
 ]
 
 # NOT in the pack, documented opt-in: nvidium (nvidia turing+ only, beta,
@@ -217,13 +251,15 @@ MODS_QOL = [
 # default. litematica's own "easy place" mode is a softer version of the same
 # question and is worth a house ruling, the way minimaps already have one.
 MODS_BUILD = [
-    ("malilib",                  "0.29.3",                None),
-    ("litematica",               "0.28.4",                None),
+    ("malilib",                  "0.29.6",                None),
+    # 2.1.1 shipped 0.28.7, which modrinth has since re-tagged BETA (it was release when
+    # that build resolved). 0.28.8 is a real release, so 2.2.0 moves off it.
+    ("litematica",               "0.28.8",                None),
 ]
 
 MODS_MAP = [
-    ("xaeros-minimap",           "fabric-26.2-26.4.2",    None),
-    ("xaeros-world-map",         "fabric-26.2-1.44.2",    None),
+    ("xaeros-minimap",           "fabric-26.2-26.5.0",    None),
+    ("xaeros-world-map",         "fabric-26.2-1.46.0",    None),
 ]
 
 # shaderpacks. loader tag is "iris", not "fabric". referenced by url only -
@@ -234,9 +270,9 @@ MODS_MAP = [
 # complementary-unbound ADDED in 2.1.0 alongside reimagined, same lockstep
 # r-version rule as euphoria-patches below.
 SHADERS = [
-    ("makeup-ultra-fast-shaders", "9.5d",   "MakeUp-UltraFast-9.5d.zip"),
-    ("complementary-reimagined",  "r5.9", "ComplementaryReimagined_r5.9.zip"),
-    ("complementary-unbound",     "r5.9", "ComplementaryUnbound_r5.9.zip"),
+    ("makeup-ultra-fast-shaders", "9.5e",   "MakeUp-UltraFast-9.5e.zip"),
+    ("complementary-reimagined",  "r5.9.2", "ComplementaryReimagined_r5.9.2.zip"),
+    ("complementary-unbound",     "r5.9.2", "ComplementaryUnbound_r5.9.2.zip"),
 ]
 
 # resource packs. loader tag is "minecraft" (modrinth's tag for a plain
@@ -280,7 +316,9 @@ RESOURCEPACKS = [
     ("fresh-animations-quivers",  "2.2.0",        "FA+Quivers-v2.2.zip"),
     ("fa-player-extension",       "1.1.0",        "FA+Player-v1.1.zip"),
     # shipped present, NOT in the resourcePacks line. the player turns it on.
-    ("whimscape",                 "26.1-26.2_r1", "Whimscape_26.1-26.2_r1.zip"),
+    # the 26.3 in the name is the NEWEST version it covers, not the oldest - 26.2 is still
+    # in its game_versions. r2 exists (09-16); r1 is what 2.2.0 pins.
+    ("whimscape",                 "26.1-26.3_r1", "Whimscape_26.1-26.3_r1.zip"),
     # GUI-only dark mode. added 2.1.0, same off-by-default posture as whimscape.
     ("default-dark-mode",         "2026.6.0-26.2", "Default-Dark-Mode-26.2-2026.6.0.zip"),
 ]
@@ -505,9 +543,13 @@ def selftest():
         c2 = {key: {"entry": entry, "meta": beta}}
         check("a cached beta not in ALLOW_BETA misses (so resolve() can FATAL)",
               cache_lookup(c2, key, "fake") is None)
-        jkey = cache_key("jei", "1", None, "mods")
+        # take the slug from ALLOW_BETA itself rather than naming one. this test used to
+        # hardcode "jei" and started FAILING the moment jei left the set in 2.2.0 - the
+        # fixture was stale, not the code. any future removal is now harmless.
+        allowed = sorted(ALLOW_BETA)[0]
+        jkey = cache_key(allowed, "1", None, "mods")
         check("a cached beta that IS in ALLOW_BETA hits",
-              cache_lookup({jkey: {"entry": entry, "meta": beta}}, jkey, "jei") is not None)
+              cache_lookup({jkey: {"entry": entry, "meta": beta}}, jkey, allowed) is not None)
 
         # HEAD-recheck semantics: cheap on a hit, but not free forever
         def boom(url):

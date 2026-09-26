@@ -1,0 +1,6 @@
+# minimal Essential override shipped with the pack: turn OFF Essential's Discord
+# Rich Presence so CraftPresence owns the status (two mods on the Discord IPC
+# pipe just flicker). verified key from Essential's EssentialConfig.kt. only
+# this section is shipped - the rest of Essential's config stays player-local.
+[quality_of_life.discord_integration]
+    set_activity_status_on_discord = false
