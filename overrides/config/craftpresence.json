@@ -1,0 +1,38 @@
+{
+  "_schemaVersion": 7,
+  "_lastMCVersionId": 770,
+  "generalSettings": {
+    "clientId": "450485984333660181",
+    "detectModrinthPack": true
+  },
+  "displaySettings": {
+    "presenceData": {
+      "enabled": true,
+      "appName": "Cinder Works",
+      "details": "The Hearth",
+      "gameState": "{getFirst(dimension.message, menu.message)}",
+      "startTimestamp": "{data.general.time}",
+      "largeImageKey": "",
+      "smallImageKey": "",
+      "largeImageText": "Cinder Works - The Hearth",
+      "smallImageText": "{player.name}"
+    }
+  },
+  "serverSettings": {
+    "serverData": {
+      "vanilla.cinderworks.dev": {
+        "data": {
+          "enabled": true,
+          "useAsMain": true,
+          "appName": "Cinder Works",
+          "details": "The Hearth",
+          "gameState": "{dimension.message}",
+          "startTimestamp": "{data.general.time}",
+          "largeImageKey": "",
+          "smallImageKey": "",
+          "largeImageText": "Cinder Works - The Hearth"
+        }
+      }
+    }
+  }
+}
