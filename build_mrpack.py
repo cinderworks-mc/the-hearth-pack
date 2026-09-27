@@ -43,9 +43,9 @@ instead of sailing through on a stale hit.
 import argparse, calendar, json, os, sys, tempfile, time, urllib.error, urllib.request, zipfile
 
 MC = "26.2"
-FABRIC_LOADER = "0.19.3"
+FABRIC_LOADER = "0.19.5"
 PACK_NAME = "The Hearth"
-PACK_VERSION = "2.2.0"
+PACK_VERSION = "2.2.1"
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, f"hearth-client-{MC}-{PACK_VERSION}.mrpack")
 CACHE_FILE = os.path.join(HERE, "resolve-cache.json")
