@@ -45,7 +45,7 @@ import argparse, calendar, json, os, sys, tempfile, time, urllib.error, urllib.r
 MC = "26.2"
 FABRIC_LOADER = "0.19.5"
 PACK_NAME = "The Hearth"
-PACK_VERSION = "2.2.2"
+PACK_VERSION = "2.2.3"
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, f"hearth-client-{MC}-{PACK_VERSION}.mrpack")
 CACHE_FILE = os.path.join(HERE, "resolve-cache.json")
@@ -65,11 +65,9 @@ ALLOW_BETA = {
     "fresh-animations",          # 1.10.5 is the only 26.2 build; FA has shipped beta-tagged for years
     "particle-rain",             # v4-beta.11+26.2-fabric is the only 26.2 build
     "visuality",                 # 0.7.14+26.2 is the only 26.2 build
-    # distanthorizons ALMOST left this list in 2.2.2 (3.3.2 is release-tagged) but
-    # 3.3.2 requires fabric loader >=0.19.5 and the SERVER still pins 0.19.3 - DH
-    # halves must match for LOD streaming, so both hold at 3.2.0-b until the server
-    # loader bump. crashed the 09-26 server deploy; see hearth-mods.nix comment.
-    "distanthorizons",           # 3.2.0-b held: pair-locked to the server (loader)
+    # distanthorizons left this list in 2.2.3 - the server's loader bump (09-27)
+    # cleared 3.3.2's requirement, and 3.3.2 is release-tagged. same move jei
+    # made in 2.2.0.
 }
 
 # each entry: (slug, pinned version_number or None, exact filename or None)
@@ -130,7 +128,7 @@ MODS_PERF = [
     # server-thread health threshold. the SERVER half moves to the same single
     # fabric+neoforge jar in the same release (cwmac/servers/hearth-mods.nix) - a
     # 3.2.0-b client against a 3.3.2 server is an untested mix upstream, never split them.
-    ("distanthorizons",          "3.2.0-b-26.2",          None),
+    ("distanthorizons",          "3.3.2-26.2",            None),
 ]
 
 MODS_VISUAL = [
