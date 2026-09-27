@@ -45,7 +45,7 @@ import argparse, calendar, json, os, sys, tempfile, time, urllib.error, urllib.r
 MC = "26.2"
 FABRIC_LOADER = "0.19.5"
 PACK_NAME = "The Hearth"
-PACK_VERSION = "2.2.1"
+PACK_VERSION = "2.2.2"
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, f"hearth-client-{MC}-{PACK_VERSION}.mrpack")
 CACHE_FILE = os.path.join(HERE, "resolve-cache.json")
@@ -65,8 +65,11 @@ ALLOW_BETA = {
     "fresh-animations",          # 1.10.5 is the only 26.2 build; FA has shipped beta-tagged for years
     "particle-rain",             # v4-beta.11+26.2-fabric is the only 26.2 build
     "visuality",                 # 0.7.14+26.2 is the only 26.2 build
-    # added 2.1.0
-    "distanthorizons",           # 26.2 line is beta only (3.2.0-b), same as the foundry
+    # distanthorizons ALMOST left this list in 2.2.2 (3.3.2 is release-tagged) but
+    # 3.3.2 requires fabric loader >=0.19.5 and the SERVER still pins 0.19.3 - DH
+    # halves must match for LOD streaming, so both hold at 3.2.0-b until the server
+    # loader bump. crashed the 09-26 server deploy; see hearth-mods.nix comment.
+    "distanthorizons",           # 3.2.0-b held: pair-locked to the server (loader)
 }
 
 # each entry: (slug, pinned version_number or None, exact filename or None)
@@ -74,15 +77,15 @@ ALLOW_BETA = {
 # (sildur's ships every quality tier under the same version number).
 
 MODS_CORE = [
-    ("fabric-api",               "0.160.0+26.2",          None),  # server half bumps to the same
+    ("fabric-api",               "0.161.0+26.2",          None),  # server half bumps to the same
     ("cloth-config",             "26.2.155+fabric",       None),
     ("placeholder-api",          None,                    None),
-    ("yacl",                     "3.9.6+26.2-fabric",     None),
+    ("yacl",                     "3.9.7+26.2-fabric",     None),
     ("fabric-language-kotlin",   "1.14.1+kotlin.2.4.20",  None),  # kotlin 2.4.10 -> 2.4.20, both halves
     ("searchables",              "1.0.1",                 None),
     ("tcdcommons",               "5.5.6+fn-26.2",         None),
     ("prism-lib",                "1.1.2",                 None),
-    ("iceberg",                  "1.4.2.1",               None),
+    ("iceberg",                  "1.4.2.2",               None),
     # default-options applies overrides/config/defaultoptions/* ONLY when the
     # real file is missing, so a fresh install gets the hearth pre-added and
     # sane distances while an existing player's settings survive every update.
@@ -101,9 +104,9 @@ MODS_CORE = [
 MODS_PERF = [
     ("sodium",                   "mc26.2-0.9.2-fabric",   None),  # 0.9.2 cut a RELEASE 09-11, off the alpha line for good
     ("lithium",                  "mc26.2-0.25.3-fabric",  None),
-    ("sodium-extra",             "mc26.2-0.9.3+fabric",   None),
-    ("reeses-sodium-options",    "mc26.2-2.2.3+fabric",   None),
-    ("immediatelyfast",          "1.16.4+26.2-fabric",    None),
+    ("sodium-extra",             "mc26.2-0.9.4+fabric",   None),
+    ("reeses-sodium-options",    "mc26.2-2.2.4+fabric",   None),
+    ("immediatelyfast",          "1.16.5+26.2-fabric",    None),
     ("ferrite-core",             "9.0.0-fabric",          None),
     ("moreculling",              "1.8.1",                 None),
     ("dynamic-fps",              "3.11.9",                None),
@@ -111,44 +114,52 @@ MODS_PERF = [
     ("bobby",                    "5.2.15+mc26.2",         None),
     ("krypton",                  "0.3.1",                 None),  # netcode rewrite, cuts join stall
     ("language-reload",          "1.7.7+26.2",            None),  # kills the resourcepack-reload stall
-    ("ixeris",                   "4.6.5+26.2-fabric",     None),  # threaded input polling, kills mouse stutter
+    ("ixeris",                   "4.6.8+26.2-fabric",     None),  # threaded input polling, kills mouse stutter
     # the modernfix FORK. the original `modernfix` slug genuinely has no 26.2
     # build; `modernfix-mvus` does, and 5 of the 8 popular client packs run it.
-    ("modernfix-mvus",           "5.27.19-build.1",       None),
+    ("modernfix-mvus",           "5.27.19-build.2",       None),
     ("scalablelux",              "0.2.1+fabric.2b08348",  None),  # starlight-derived client light engine
     # borderless fullscreen. this is the `borderless-mining` replacement - and
     # it declares every other borderless mod INCOMPATIBLE, so never add one.
     ("cubes-without-borders",    "4.1.0+26.2",            None),
     # distant horizons, shipped OFF (config/defaultoptions/extra/config/
     # DistantHorizons.toml sets quickEnableRendering=false, same as the foundry).
-    # present but dormant; players enable it in options -> distant horizons. 26.2
-    # only has beta builds (ALLOW_BETA), same as the foundry ships.
+    # present but dormant; players enable it in options -> distant horizons.
+    # 2.2.2: 3.2.0-b -> 3.3.2, the first RELEASE-tagged 26.2 build, so DH drops out of
+    # ALLOW_BETA above. reverse-Z depth rendering + iris shadow-map fixes + a raised
+    # server-thread health threshold. the SERVER half moves to the same single
+    # fabric+neoforge jar in the same release (cwmac/servers/hearth-mods.nix) - a
+    # 3.2.0-b client against a 3.3.2 server is an untested mix upstream, never split them.
     ("distanthorizons",          "3.2.0-b-26.2",          None),
 ]
 
 MODS_VISUAL = [
     ("iris",                     "1.11.4+26.2-fabric",    None),  # lockstep with sodium 0.9.2
     ("continuity",               "3.0.1+26.2",            None),
-    ("3dskinlayers",             "1.11.2",                None),
+    ("3dskinlayers",             "1.11.3",                None),
     ("capes",                    "1.5.11+26.2",           None),
     ("lambdynamiclights",        "4.12.4+26.2",           None),  # 4.12.3->4.12.4: options.txt keybind fix
-    ("not-enough-animations",    "1.12.4",                None),
+    ("not-enough-animations",    "1.12.5",                None),
     ("chat-heads",               "1.2.8",                 None),
     # optifine-format resource pack support (fresh animations etc). emf needs etf.
-    ("entitytexturefeatures",    "7.2.1-fabric-26.2",     None),  # 7.1.1->7.2.1: crash fix
+    ("entitytexturefeatures",    "7.2.4-fabric-26.2",     None),  # 7.2.1->7.2.4, emf HELD at 3.3.8
     # 2.1.1 took 3.2.6->3.3.5 because etf 7.2.1 requires emf >=3.3 (launch crash otherwise).
     # 2.2.0 goes to 3.3.8: it still declares `entity_texture_features >=7.2` / breaks <7.2,
-    # so etf 7.2.1 satisfies it and etf's own `breaks emf <3.3` stays satisfied too. upstream
+    # so etf satisfies it and etf's own `breaks emf <3.3` stays satisfied too. upstream
     # ships emf/etf as a same-day pair, so if etf ever moves, re-check this constraint.
+    # 2.2.2 moved etf 7.2.1 -> 7.2.4 with emf HELD at 3.3.8: re-checked, `>=7.2` still
+    # covers 7.2.4 and 3.3.8 is the newest emf on 26.2 (upstream shipped the two the same
+    # day, 09-18, so the same-day-pair rule holds). 7.2.4 also fixes a shoulder-parrot
+    # issue that affected emf.
     ("entity-model-features",    "3.3.8-fabric-26.2",     None),
     ("optigui",                  "2.3.0-beta.10+26.2",    None),
     # add-on for the complementary shaders below (both reimagined and unbound,
     # as of 2.1.0). it patches a COPY of the shader in shaderpacks/, base stays
     # intact. lockstep rule: bump complementary -> bump this to the matching
     # r-version.
-    ("euphoria-patches",         "1.10.4-r5.9.2-fabric",  None),  # lockstep with complementary r5.9.2
+    ("euphoria-patches",         "1.10.5-r5.9.3-fabric",  None),  # lockstep with complementary r5.9.3
     ("fallingleaves",            "2.0.7+26.1",            None),  # lists 26.2, ambient leaf particles
-    ("wavey-capes",              "1.11.1",                None),  # the motion half of `capes`
+    ("wavey-capes",              "1.11.2",                None),  # the motion half of `capes`
     ("particle-rain",            "v4-beta.11+26.2-fabric", None),  # biome weather, ALLOW_BETA
     ("visuality",                "0.7.14+26.2",           None),  # ambient mob particles, ALLOW_BETA
     # config gui + glue for the optifine-alternative stack above (etf, emf,
@@ -168,31 +179,31 @@ MODS_AUDIO = [
 ]
 
 MODS_QOL = [
-    ("modmenu",                  "20.0.2",                None),
+    ("modmenu",                  "20.0.3",                None),
     ("jade",                     "26.2.11+fabric",        None),
     ("appleskin",                "3.0.10+mc26.2",         None),
     # 1.10.0: rei -> jei. rei looked broken on 26.2 (recipes are
     # server-authoritative since 1.21.2); jei ships a server jar for that,
     # which lives in the server's hearth-mods.nix. architectury-api left with rei.
     ("jei",                      "30.29.0.201",           None),  # matched to the server's jei
-    ("controlling",              "26.2.2",                None),
+    ("controlling",              "26.2.4",                None),
     ("betterf3",                 "19.0.0",                None),
     ("legendary-tooltips",       "1.6.2.1",               None),  # 1.6.2 crashed with jei 30.24.0.173 (its jei mixin), fixed upstream 08-18
     ("mouse-tweaks",             "26.2-2.31-fabric",      None),
-    ("zoomify",                  "2.16.1+26.2",           None),
+    ("zoomify",                  "2.16.3+26.2",           None),
     ("better-stats",             "5.5.6+fn-26.2",         None),
-    ("debugify",                 "26.2.0.0",              None),
+    ("debugify",                 "26.2.0.1",              None),
     ("simple-voice-chat",        "fabric-2.6.22+26.2",    None),
-    ("shulkerboxtooltip",        "5.4.0+26.2-fabric",     None),
+    ("shulkerboxtooltip",        "5.4.1+26.2-fabric",     None),
     ("morechathistory",          "2.0.0",                 None),
     ("fadeless",                 "2.0.8-26.2",            None),
     ("lighty",                   "4.0.1+26.2",            None),  # light overlay, f7/f8
-    ("stendhal",                 "1.4.8-26.2",            None),  # book/sign editor
+    ("stendhal",                 "1.4.9-26.2",            None),  # book/sign editor
     # strips chat signatures. harmless on the hearth: enforce-secure-profile=false
     # is already set server-side. also disables mojang telemetry (so no separate
     # no-telemetry mod).
     ("no-chat-reports",          "Fabric-26.2-v2.20.2",   None),
-    ("in-game-account-switcher", "9.0.7+26.2-fabric",     None),
+    ("in-game-account-switcher", "9.0.8+26.2-fabric",     None),
     ("essential",                "1.4.1.1",               None),
     # same patcher the foundry ships; fixes essential's launcher-side patching
     # (controls essential's ads/purchase-prompts/telemetry). modrinth flags are
@@ -212,7 +223,7 @@ MODS_QOL = [
     # kept alongside notenoughcrashes on purpose, they do different jobs: nec
     # keeps the session alive after a client crash, crash-assistant explains the
     # corpse afterwards and points at somewhere to report it.
-    ("crash-assistant",          "1.11.12",               None),
+    ("crash-assistant",          "1.11.14",               None),
     # ---- added in 2.2.0. all three are the CLIENT half of a mod the server runs,
     # pinned to the exact build in cwmac/servers/hearth-mods.nix. if the server moves,
     # these move with it.
@@ -221,9 +232,9 @@ MODS_QOL = [
     # 2.2.0; modrinth flags it client:optional, but "optional" here means the game still
     # WORKS without it, not that it looks right - the client install is what draws the
     # chestplate on the player model and gives the fused item its own icon. without it an
-    # armored elytra renders as a plain elytra. 1.15.0 matches the server exactly (1.15.1
-    # exists, 09-19; move both halves together, not one).
-    ("elytra-armor",             "1.15.0",                None),
+    # armored elytra renders as a plain elytra. 1.15.1 matches the server exactly - both
+    # halves moved together in 2.2.2 (1.15.1 is a one-line piglin-aggro hotfix).
+    ("elytra-armor",             "1.15.1",                None),
     # veinminer. BOTH halves are required on the client: veinminer-client's
     # fabric.mod.json hard-depends on `veinminer >=2.8.0`, so shipping the client half
     # alone makes fabric loader REFUSE TO LAUNCH. the base jar is environment:"*" and
@@ -258,8 +269,8 @@ MODS_BUILD = [
 ]
 
 MODS_MAP = [
-    ("xaeros-minimap",           "fabric-26.2-26.5.0",    None),
-    ("xaeros-world-map",         "fabric-26.2-1.46.0",    None),
+    ("xaeros-minimap",           "fabric-26.2-26.5.1",    None),
+    ("xaeros-world-map",         "fabric-26.2-1.46.1",    None),
 ]
 
 # shaderpacks. loader tag is "iris", not "fabric". referenced by url only -
@@ -271,8 +282,8 @@ MODS_MAP = [
 # r-version rule as euphoria-patches below.
 SHADERS = [
     ("makeup-ultra-fast-shaders", "9.5e",   "MakeUp-UltraFast-9.5e.zip"),
-    ("complementary-reimagined",  "r5.9.2", "ComplementaryReimagined_r5.9.2.zip"),
-    ("complementary-unbound",     "r5.9.2", "ComplementaryUnbound_r5.9.2.zip"),
+    ("complementary-reimagined",  "r5.9.3", "ComplementaryReimagined_r5.9.3.zip"),
+    ("complementary-unbound",     "r5.9.3", "ComplementaryUnbound_r5.9.3.zip"),
 ]
 
 # resource packs. loader tag is "minecraft" (modrinth's tag for a plain
@@ -317,8 +328,8 @@ RESOURCEPACKS = [
     ("fa-player-extension",       "1.1.0",        "FA+Player-v1.1.zip"),
     # shipped present, NOT in the resourcePacks line. the player turns it on.
     # the 26.3 in the name is the NEWEST version it covers, not the oldest - 26.2 is still
-    # in its game_versions. r2 exists (09-16); r1 is what 2.2.0 pins.
-    ("whimscape",                 "26.1-26.3_r1", "Whimscape_26.1-26.3_r1.zip"),
+    # in its game_versions. 2.2.2 moves r1 -> r2 (two texture fixes).
+    ("whimscape",                 "26.1-26.3_r2", "Whimscape_26.1-26.3_r2.zip"),
     # GUI-only dark mode. added 2.1.0, same off-by-default posture as whimscape.
     ("default-dark-mode",         "2026.6.0-26.2", "Default-Dark-Mode-26.2-2026.6.0.zip"),
 ]

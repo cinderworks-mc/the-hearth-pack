@@ -3,6 +3,17 @@
 what changed in the pack, newest first. versions before 2.0.0 predate this
 repo.
 
+## 2.2.2 (09-26-2026)
+
+- viaversion and viabackwards move off snapshot builds onto the real 5.12.0 release on the server. nothing changes for you, it just means older clients are connecting through a build that shipped rather than one that was cut nightly.
+- the server's kotlin runtime catches up to the client's at 2.4.20, so both halves run the same one for the first time since 2.2.0.
+- client bumps: fabric api 0.161.0 (with the server), yacl 3.9.7, iceberg 1.4.2.2, sodium extra 0.9.4 and reese's sodium options 2.2.4, immediately fast 1.16.5, ixeris 4.6.8, modernfix 5.27.19-build.2, 3d skin layers 1.11.3, not enough animations 1.12.5, entity texture features 7.2.4, wavey capes 1.11.2, modmenu 20.0.3, controlling 26.2.4, zoomify 2.16.3, debugify 26.2.0.1, shulker box tooltip 5.4.1, stendhal 1.4.9, in-game account switcher 9.0.8, crash assistant 1.11.14, armored elytra 1.15.1 (with the server), xaero's minimap 26.5.1 and world map 1.46.1.
+- both complementary shaders to r5.9.3 with euphoria patches matching, and whimscape r2 (two texture fixes; it still ships off).
+- server-side bumps you won't see directly: collective, balm and forgiving void as a pair, luckperms, spark, fuji and lootr.
+- distant horizons stays at 3.2.0-b on both halves for now: the new 3.3.2 release
+  needs a newer fabric loader than the server runs. it moves in the next update.
+- re-import the pack.
+
 ## 2.2.1 (09-26-2026)
 
 - fixes 2.2.0 refusing to launch: fabric language kotlin 1.14.1 needs fabric
