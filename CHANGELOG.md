@@ -3,6 +3,17 @@
 what changed in the pack, newest first. versions before 2.0.0 predate this
 repo.
 
+## 2.2.3 (09-27-2026)
+
+- distant horizons moves to the 3.3.2 release line on both halves, unblocked by
+  a server fabric-loader bump to 0.19.5. what it brings: reverse-Z depth
+  rendering, iris shadow and depth fixes, and about half the disk work. your
+  local LOD database migrates itself on first launch - give it a moment.
+- kotlin runtime lands on 1.14.1 both sides, closing out the version splits.
+- nothing else changes from 2.2.2; if you already imported 2.2.2 this is a
+  small update, and if you're coming from 2.2.1 you get both at once.
+- re-import the pack.
+
 ## 2.2.2 (09-26-2026)
 
 - viaversion and viabackwards move off snapshot builds onto the real 5.12.0 release on the server. nothing changes for you, it just means older clients are connecting through a build that shipped rather than one that was cut nightly.
