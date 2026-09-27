@@ -3,6 +3,13 @@
 what changed in the pack, newest first. versions before 2.0.0 predate this
 repo.
 
+## 2.2.1 (09-26-2026)
+
+- fixes 2.2.0 refusing to launch: fabric language kotlin 1.14.1 needs fabric
+  loader 0.19.5 and the pack still pinned 0.19.3, so fabric bailed at startup.
+  the pack now installs loader 0.19.5. no mod content changes.
+- re-import the pack.
+
 ## 2.2.0 (09-26-2026)
 
 - armored elytras are a real mod now instead of a datapack. forge one by putting a chestplate and an elytra in an anvil, split it back apart in a grindstone - same two actions, proper item handling underneath instead of datapack functions running every tick.
