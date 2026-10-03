@@ -1,0 +1,10 @@
+# build output. released .mrpack files live on the github releases + modrinth
+*.mrpack
+__pycache__/
+resolve-cache.json
+
+# download page build output (site/deploy.sh rebuilds it)
+site/build/
+
+# deploy target (internal, not for the public repo)
+site/deploy.env
