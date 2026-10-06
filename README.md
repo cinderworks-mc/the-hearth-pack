@@ -15,7 +15,7 @@ python3 build_mrpack.py
 
 every entry is resolved live against the modrinth api and the build dies if any
 one of them fails: must be `release` (or listed in `ALLOW_BETA` with a reason),
-must list 26.2, must be hosted on cdn.modrinth.com, must carry sha1 + sha512,
+must list the pack's MC version (26.3 since 3.0.0), must be hosted on cdn.modrinth.com, must carry sha1 + sha512,
 and must pass a live HEAD whose content-length matches the api.
 
 **nothing third-party is bundled.** not the jars, not the shader zips, not the

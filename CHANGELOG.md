@@ -3,6 +3,16 @@
 what changed in the pack, newest first. versions before 2.0.0 predate this
 repo.
 
+## 3.0.0 (10-05-2026)
+
+- the pack moves to minecraft 26.3. update before you join after the switch: an old 2.2.x install may still get through the server's viaversion, but its server-matched mods (jei, voice chat, distant horizons, armored elytra) won't line up with the server any more. fabric loader stays 0.19.5.
+- four mods sit this one out because they have no 26.3 build yet: bobby, cubes without borders, particle rain and essential patcher. they come back when their authors catch up.
+- essential is out too, for now. it has a 26.3 build, but the patcher that keeps it quiet does not, and we don't ship one without the other. both return together.
+- everything else moves to its 26.3 build. a few of those are beta or alpha because that is all upstream has cut so far: jei, simple voice chat, scalablelux (alpha), better statistics screen and its tcdcommons library, plus the long-standing betas (sound physics, optigui, visuality, fresh animations).
+- the server-matched mods move with the server: fabric api 0.161.0, jei 31.9.0.58, simple voice chat 2.6.24, distant horizons 3.3.4, veinminer 2.12.3, armored elytra 1.16.0, appleskin, krypton, lithium and friends.
+- notable client bumps: iris 1.11.7 with sodium 0.9.2 for 26.3, modmenu 21, betterf3 20, xaero's minimap 26.6.0 and world map 1.47.0, malilib 0.30.2 with litematica 0.29.1, entity model features 3.3.11 with entity texture features 7.2.5, makeup ultra fast 9.5g, default dark mode for 26.3.
+- re-import the pack (the modrinth app offers the update on its own; say yes, it changes the instance's minecraft version).
+
 ## 2.2.3 (09-27-2026)
 
 - distant horizons moves to the 3.3.2 release line on both halves, unblocked by

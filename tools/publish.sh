@@ -14,7 +14,7 @@ v="${1:?usage: HEARTH_SRC=/path/to/client-pack tools/publish.sh <version>}"
 src="${HEARTH_SRC:?point HEARTH_SRC at the client-pack source dir}"
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
 
-mrpack="$src/hearth-client-26.2-$v.mrpack"
+mrpack="$src/hearth-client-26.3-$v.mrpack"  # 26.3 since 3.0.0
 [ -f "$mrpack" ] || { echo "missing $mrpack" >&2; exit 1; }
 
 # copy the released pack source in
