@@ -1,5 +1,7 @@
 # the hearth client pack
 
+[![discord](https://img.shields.io/discord/1560020457363738624?label=discord&logo=discord&color=e8742a)](https://discord.gg/ZmmtPNJUcK)
+
 optional client-side mods, shaders and resource packs for the hearth.
 mc 26.2, fabric loader 0.19.3, java only. nothing in here is required to play -
 the server runs a vanilla-client rule and always will.
